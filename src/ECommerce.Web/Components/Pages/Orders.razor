@@ -196,7 +196,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        }
+        catch
+        {
+            // Ignore errors
+        }
     }
 
     protected override async Task OnParametersSetAsync()

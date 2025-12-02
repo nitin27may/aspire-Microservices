@@ -155,3 +155,28 @@ public record InventoryDto
     public int AvailableStock { get; init; }
     public DateTime LastUpdated { get; init; }
 }
+
+public record StockCheckRequest
+{
+    public List<StockCheckRequestItem> Items { get; init; } = [];
+}
+
+public record StockCheckRequestItem
+{
+    public int ProductId { get; init; }
+    public int Quantity { get; init; }
+}
+
+public record StockCheckResponse
+{
+    public bool AllAvailable { get; init; }
+    public List<StockCheckItem> Items { get; init; } = [];
+}
+
+public record StockCheckItem
+{
+    public int ProductId { get; init; }
+    public int RequestedQuantity { get; init; }
+    public int AvailableQuantity { get; init; }
+    public bool IsAvailable { get; init; }
+}

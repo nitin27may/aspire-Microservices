@@ -2,7 +2,7 @@
 
 A production-quality, end-to-end e-commerce demonstration showcasing microservices architecture orchestrated by .NET Aspire. This demo serves as both a learning resource and a reference implementation demonstrating real-world microservice patterns, service communication, and distributed system orchestration.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### Microservices
 - **Product Catalog API** - Product browsing, search, category management with Redis caching
@@ -18,7 +18,12 @@ A production-quality, end-to-end e-commerce demonstration showcasing microservic
 - **RabbitMQ** - Asynchronous event-driven communication between services
 - **.NET Aspire AppHost** - Orchestration and service discovery
 
-## 🚀 Getting Started
+### Architecture Diagrams
+For detailed architecture and data flow visualizations, see:
+- [Architecture Overview Diagram](docs/architecture-overview.md) - Complete system architecture with all microservices and infrastructure
+- [Data Flow Diagram](docs/data-flow-diagram.md) - End-to-end user journey showing data flow through the system
+
+## Getting Started
 
 ### Prerequisites
 - .NET 9 SDK
@@ -46,14 +51,14 @@ dotnet run
 - **Email:** demo@example.com
 - **Password:** Demo123!
 
-## 🔄 User Journey
+## User Journey
 
 1. **Browse Products** - View products by category, search, sort, and filter
 2. **Add to Cart** - Products are stored in browser localStorage
 3. **Checkout** - Requires authentication, validates inventory
 4. **Order Confirmation** - Receives order number, email notification sent
 
-## 📊 Database Schema
+## Database Schema
 
 ### Databases
 - `catalogdb` - Products and Categories
@@ -62,7 +67,7 @@ dotnet run
 - `inventorydb` - Inventory and Reservations
 - `notificationsdb` - Email logs
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **.NET 9** - Application framework
 - **.NET Aspire** - Cloud-native orchestration
@@ -75,7 +80,7 @@ dotnet run
 - **PostgreSQL** - Database
 - **Scalar** - API documentation (replacement for Swagger)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
@@ -91,7 +96,7 @@ src/
     └── ECommerce.Shared.Contracts/ # Shared event contracts
 ```
 
-## 🔌 API Endpoints
+## API Endpoints
 
 Each API service exposes Scalar API documentation at `/scalar/v1`.
 
@@ -116,7 +121,7 @@ Each API service exposes Scalar API documentation at `/scalar/v1`.
 - `POST /api/inventory/check` - Check stock availability
 - `POST /api/inventory/reserve` - Reserve inventory
 
-## 📧 Email Configuration
+## Email Configuration
 
 By default, the notification service logs emails to the database. For actual email delivery:
 
@@ -136,7 +141,7 @@ By default, the notification service logs emails to the database. For actual ema
 
 2. Or use SMTP4Dev for local development
 
-## 📈 Observability
+## Observability
 
 The Aspire Dashboard provides:
 - **Distributed Tracing** - Track requests across services
@@ -144,7 +149,7 @@ The Aspire Dashboard provides:
 - **Metrics** - Service health monitoring
 - **Service Discovery** - View all running services
 
-## 🧪 Seed Data
+## Seed Data
 
 The application comes pre-seeded with:
 - 5 Categories (Electronics, Clothing, Home & Garden, Sports & Outdoors, Books)
@@ -152,6 +157,6 @@ The application comes pre-seeded with:
 - 2 Test Users (demo@example.com, test@example.com)
 - Initial inventory (100 units per product)
 
-## 📝 License
+## License
 
 This project is for demonstration purposes.

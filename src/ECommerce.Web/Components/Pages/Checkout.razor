@@ -2,6 +2,7 @@
 @inject CartService CartService
 @inject AuthService AuthService
 @inject OrderService OrderService
+@inject InventoryService InventoryService
 @inject NavigationManager Navigation
 
 <div class="container py-4">
@@ -21,6 +22,25 @@
     }
     else
     {
+        @if (stockIssues.Any())
+        {
+            <div class="alert alert-danger mb-4">
+                <i class="bi bi-exclamation-octagon me-2"></i>
+                <strong>Cannot proceed - Stock issues detected:</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach (var issue in stockIssues)
+                    {
+                        <li>@issue</li>
+                    }
+                </ul>
+                <div class="mt-3">
+                    <a href="/cart" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Return to Cart
+                    </a>
+                </div>
+            </div>
+        }
+
         <div class="row">
             <div class="col-lg-8">
                 <!-- Shipping Address -->
@@ -98,11 +118,16 @@
                             <strong>Total</strong>
                             <strong class="text-primary">$@cart.Total.ToString("F2")</strong>
                         </div>
-                        <button class="btn btn-success w-100" @onclick="PlaceOrderAsync" disabled="@isProcessing">
+                        <button class="btn btn-success w-100" @onclick="PlaceOrderAsync" disabled="@(isProcessing || stockIssues.Any())">
                             @if (isProcessing)
                             {
                                 <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                                 <span>Processing...</span>
+                            }
+                            else if (stockIssues.Any())
+                            {
+                                <i class="bi bi-x-circle me-2"></i>
+                                <span>Stock Unavailable</span>
                             }
                             else
                             {
@@ -133,25 +158,79 @@
     private string city = "";
     private string postalCode = "";
     private string country = "";
+    private List<string> stockIssues = new();
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthenticated = await AuthService.IsAuthenticatedAsync();
-        
-        if (isAuthenticated)
+        try
         {
-            cart = await CartService.GetCartAsync();
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
             
-            var user = await AuthService.GetCurrentUserAsync();
-            if (user != null)
+            if (isAuthenticated)
             {
-                // Pre-fill with user's stored address (if available in future)
-                // For now, use default values
-                shippingAddress = "123 Main St";
-                city = "Toronto";
-                postalCode = "M5H 2N2";
-                country = "Canada";
+                cart = await CartService.GetCartAsync();
+                
+                // Check stock availability
+                await CheckStockAvailabilityAsync();
+                
+                var user = await AuthService.GetCurrentUserAsync();
+                if (user != null)
+                {
+                    // Pre-fill with default values
+                    shippingAddress = "123 Main St";
+                    city = "Toronto";
+                    postalCode = "M5H 2N2";
+                    country = "Canada";
+                }
             }
+        }
+        catch
+        {
+            // Ignore errors
+        }
+    }
+
+    private async Task CheckStockAvailabilityAsync()
+    {
+        stockIssues.Clear();
+
+        if (cart == null || !cart.Items.Any()) return;
+
+        try
+        {
+            var checkItems = cart.Items.Select(i => new StockCheckRequestItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity
+            }).ToList();
+
+            var result = await InventoryService.CheckStockAsync(checkItems);
+
+            if (result != null)
+            {
+                foreach (var item in result.Items)
+                {
+                    if (!item.IsAvailable)
+                    {
+                        var cartItem = cart.Items.FirstOrDefault(c => c.ProductId == item.ProductId);
+                        if (cartItem != null)
+                        {
+                            if (item.AvailableQuantity == 0)
+                            {
+                                stockIssues.Add($"{cartItem.ProductName} is out of stock.");
+                            }
+                            else
+                            {
+                                stockIssues.Add($"{cartItem.ProductName}: Only {item.AvailableQuantity} available (you requested {item.RequestedQuantity}).");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Ignore stock check errors - will be caught during order placement
         }
     }
 
@@ -161,6 +240,12 @@
             string.IsNullOrWhiteSpace(postalCode) || string.IsNullOrWhiteSpace(country))
         {
             errorMessage = "Please fill in all shipping address fields.";
+            return;
+        }
+
+        if (stockIssues.Any())
+        {
+            errorMessage = "Please resolve stock availability issues before placing your order.";
             return;
         }
 

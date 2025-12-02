@@ -105,28 +105,52 @@
 
     protected override async Task OnInitializedAsync()
     {
-        AuthService.OnAuthStateChanged += async () => await UpdateAuthStateAsync();
-        CartService.OnCartChanged += async () => await UpdateCartCountAsync();
+        AuthService.OnAuthStateChanged += HandleAuthStateChanged;
+        CartService.OnCartChanged += HandleCartChanged;
         
         await UpdateAuthStateAsync();
         await UpdateCartCountAsync();
     }
 
+    private async void HandleAuthStateChanged()
+    {
+        await UpdateAuthStateAsync();
+    }
+
+    private async void HandleCartChanged()
+    {
+        await UpdateCartCountAsync();
+    }
+
     private async Task UpdateAuthStateAsync()
     {
-        isAuthenticated = await AuthService.IsAuthenticatedAsync();
-        if (isAuthenticated)
+        try
         {
-            var user = await AuthService.GetCurrentUserAsync();
-            userName = user?.FirstName ?? "User";
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                var user = await AuthService.GetCurrentUserAsync();
+                userName = user?.FirstName ?? "User";
+            }
+            await InvokeAsync(StateHasChanged);
         }
-        await InvokeAsync(StateHasChanged);
+        catch
+        {
+            // Ignore errors
+        }
     }
 
     private async Task UpdateCartCountAsync()
     {
-        cartCount = await CartService.GetCartCountAsync();
-        await InvokeAsync(StateHasChanged);
+        try
+        {
+            cartCount = await CartService.GetCartCountAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch
+        {
+            // Ignore errors
+        }
     }
 
     private async Task LogoutAsync()

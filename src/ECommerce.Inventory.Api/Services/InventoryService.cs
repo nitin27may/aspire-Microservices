@@ -38,7 +38,7 @@ public class InventoryService
         if (!cached.IsNullOrEmpty)
         {
             _logger.LogInformation("Cache hit for inventory: {ProductId}", productId);
-            return JsonSerializer.Deserialize<InventoryDto>(cached!);
+            return JsonSerializer.Deserialize<InventoryDto>(cached.ToString());
         }
 
         _logger.LogInformation("Cache miss for inventory: {ProductId}", productId);
@@ -97,66 +97,71 @@ public class InventoryService
     /// </summary>
     public async Task<ReservationResponse> ReserveInventoryAsync(ReserveInventoryRequest request)
     {
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        
+        return await strategy.ExecuteAsync(async () =>
         {
-            foreach (var item in request.Items)
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
             {
-                var inventory = await _dbContext.Inventory.FindAsync(item.ProductId);
-                if (inventory == null)
+                foreach (var item in request.Items)
                 {
-                    return new ReservationResponse
+                    var inventory = await _dbContext.Inventory.FindAsync(item.ProductId);
+                    if (inventory == null)
                     {
-                        Success = false,
-                        Error = $"Product {item.ProductId} not found in inventory."
+                        return new ReservationResponse
+                        {
+                            Success = false,
+                            Error = $"Product {item.ProductId} not found in inventory."
+                        };
+                    }
+
+                    if (inventory.AvailableStock < item.Quantity)
+                    {
+                        return new ReservationResponse
+                        {
+                            Success = false,
+                            Error = $"Insufficient stock for product {item.ProductId}. Available: {inventory.AvailableStock}, Requested: {item.Quantity}"
+                        };
+                    }
+
+                    inventory.ReservedStock += item.Quantity;
+                    inventory.LastUpdated = DateTime.UtcNow;
+
+                    var reservation = new InventoryReservation
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        OrderId = request.OrderId,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+                        IsActive = true
                     };
+
+                    _dbContext.Reservations.Add(reservation);
+
+                    // Invalidate cache
+                    var db = _redis.GetDatabase();
+                    await db.KeyDeleteAsync($"inventory:{item.ProductId}");
                 }
 
-                if (inventory.AvailableStock < item.Quantity)
-                {
-                    return new ReservationResponse
-                    {
-                        Success = false,
-                        Error = $"Insufficient stock for product {item.ProductId}. Available: {inventory.AvailableStock}, Requested: {item.Quantity}"
-                    };
-                }
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                inventory.ReservedStock += item.Quantity;
-                inventory.LastUpdated = DateTime.UtcNow;
+                _logger.LogInformation("Inventory reserved for order: {OrderId}", request.OrderId);
 
-                var reservation = new InventoryReservation
-                {
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    OrderId = request.OrderId,
-                    ExpiresAt = DateTime.UtcNow.AddMinutes(10),
-                    IsActive = true
-                };
-
-                _dbContext.Reservations.Add(reservation);
-
-                // Invalidate cache
-                var db = _redis.GetDatabase();
-                await db.KeyDeleteAsync($"inventory:{item.ProductId}");
+                return new ReservationResponse { Success = true };
             }
-
-            await _dbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            _logger.LogInformation("Inventory reserved for order: {OrderId}", request.OrderId);
-
-            return new ReservationResponse { Success = true };
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            _logger.LogError(ex, "Failed to reserve inventory");
-            return new ReservationResponse
+            catch (Exception ex)
             {
-                Success = false,
-                Error = "An error occurred while reserving inventory."
-            };
-        }
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to reserve inventory: {Message}", ex.Message);
+                return new ReservationResponse
+                {
+                    Success = false,
+                    Error = $"An error occurred while reserving inventory: {ex.Message}"
+                };
+            }
+        });
     }
 
     /// <summary>
@@ -164,47 +169,52 @@ public class InventoryService
     /// </summary>
     public async Task<bool> DeductInventoryAsync(int orderId, List<ReserveItem> items)
     {
-        using var transaction = await _dbContext.Database.BeginTransactionAsync();
-        try
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
+        
+        return await strategy.ExecuteAsync(async () =>
         {
-            foreach (var item in items)
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
             {
-                var inventory = await _dbContext.Inventory.FindAsync(item.ProductId);
-                if (inventory == null) continue;
-
-                // Find and deactivate reservations
-                var reservations = await _dbContext.Reservations
-                    .Where(r => r.OrderId == orderId && r.ProductId == item.ProductId && r.IsActive)
-                    .ToListAsync();
-
-                var totalReserved = reservations.Sum(r => r.Quantity);
-
-                inventory.Stock -= item.Quantity;
-                inventory.ReservedStock -= totalReserved;
-                inventory.LastUpdated = DateTime.UtcNow;
-
-                foreach (var reservation in reservations)
+                foreach (var item in items)
                 {
-                    reservation.IsActive = false;
+                    var inventory = await _dbContext.Inventory.FindAsync(item.ProductId);
+                    if (inventory == null) continue;
+
+                    // Find and deactivate reservations
+                    var reservations = await _dbContext.Reservations
+                        .Where(r => r.OrderId == orderId && r.ProductId == item.ProductId && r.IsActive)
+                        .ToListAsync();
+
+                    var totalReserved = reservations.Sum(r => r.Quantity);
+
+                    inventory.Stock -= item.Quantity;
+                    inventory.ReservedStock -= totalReserved;
+                    inventory.LastUpdated = DateTime.UtcNow;
+
+                    foreach (var reservation in reservations)
+                    {
+                        reservation.IsActive = false;
+                    }
+
+                    // Invalidate cache
+                    var db = _redis.GetDatabase();
+                    await db.KeyDeleteAsync($"inventory:{item.ProductId}");
                 }
 
-                // Invalidate cache
-                var db = _redis.GetDatabase();
-                await db.KeyDeleteAsync($"inventory:{item.ProductId}");
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation("Inventory deducted for order: {OrderId}", orderId);
+                return true;
             }
-
-            await _dbContext.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            _logger.LogInformation("Inventory deducted for order: {OrderId}", orderId);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            _logger.LogError(ex, "Failed to deduct inventory for order: {OrderId}", orderId);
-            return false;
-        }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to deduct inventory for order: {OrderId}", orderId);
+                return false;
+            }
+        });
     }
 
     /// <summary>

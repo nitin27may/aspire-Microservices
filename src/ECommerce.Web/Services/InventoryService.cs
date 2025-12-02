@@ -25,4 +25,26 @@ public class InventoryService
             return null;
         }
     }
+
+    /// <summary>
+    /// Checks stock availability for multiple items.
+    /// </summary>
+    public async Task<StockCheckResponse?> CheckStockAsync(List<StockCheckRequestItem> items)
+    {
+        try
+        {
+            var request = new StockCheckRequest { Items = items };
+            var response = await _httpClient.PostAsJsonAsync("/api/inventory/check", request);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<StockCheckResponse>();
+            }
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
 }

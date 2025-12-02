@@ -90,10 +90,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        isAuthenticated = await AuthService.IsAuthenticatedAsync();
-        if (isAuthenticated)
+        try
         {
-            user = await AuthService.GetCurrentUserAsync();
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                user = await AuthService.GetCurrentUserAsync();
+            }
+        }
+        catch
+        {
+            // Ignore errors
         }
     }
 

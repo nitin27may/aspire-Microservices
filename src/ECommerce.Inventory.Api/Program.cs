@@ -34,6 +34,23 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     await context.Database.EnsureCreatedAsync();
+    
+    // Seed inventory data if empty
+    if (!context.Inventory.Any())
+    {
+        var inventoryItems = Enumerable.Range(1, 20)
+            .Select(id => new InventoryItem
+            {
+                ProductId = id,
+                Stock = 100,
+                ReservedStock = 0,
+                LastUpdated = DateTime.UtcNow
+            })
+            .ToList();
+        
+        context.Inventory.AddRange(inventoryItems);
+        await context.SaveChangesAsync();
+    }
 }
 
 // API Endpoints

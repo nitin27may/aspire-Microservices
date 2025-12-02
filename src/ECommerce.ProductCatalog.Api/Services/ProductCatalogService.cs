@@ -76,7 +76,7 @@ public class ProductCatalogService
         if (!cached.IsNullOrEmpty)
         {
             _logger.LogInformation("Cache hit for key: {CacheKey}", cacheKey);
-            return JsonSerializer.Deserialize<PaginatedResponse<ProductDto>>(cached!)!;
+            return JsonSerializer.Deserialize<PaginatedResponse<ProductDto>>(cached.ToString())!;
         }
 
         _logger.LogInformation("Cache miss for key: {CacheKey}", cacheKey);
@@ -151,7 +151,7 @@ public class ProductCatalogService
         if (!cached.IsNullOrEmpty)
         {
             _logger.LogInformation("Cache hit for product: {ProductId}", id);
-            return JsonSerializer.Deserialize<ProductDto>(cached!);
+            return JsonSerializer.Deserialize<ProductDto>(cached.ToString());
         }
 
         _logger.LogInformation("Cache miss for product: {ProductId}", id);
@@ -192,7 +192,7 @@ public class ProductCatalogService
         
         if (!cached.IsNullOrEmpty)
         {
-            return JsonSerializer.Deserialize<List<ProductDto>>(cached!)!;
+            return JsonSerializer.Deserialize<List<ProductDto>>(cached.ToString())!;
         }
 
         var products = await _dbContext.Products
