@@ -26,6 +26,9 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    
+    // Redirect root to Scalar API docs
+    app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
 
 // Initialize database
