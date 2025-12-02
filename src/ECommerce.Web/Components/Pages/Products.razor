@@ -268,10 +268,7 @@ else
     {
         if (selectedProduct != null)
         {
-            for (int i = 0; i < quantity; i++)
-            {
-                await CartService.AddToCartAsync(selectedProduct);
-            }
+            await CartService.AddToCartAsync(selectedProduct, quantity);
             addedToCart = true;
             StateHasChanged();
             await Task.Delay(3000);

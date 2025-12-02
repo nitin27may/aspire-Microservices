@@ -102,8 +102,8 @@ public class EmailService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "SMTP send failed. Email logged but not delivered. SMTP might not be configured.");
-            // In development without SMTP server, we just log the email
-            throw;
+            // In development without SMTP server, we don't re-throw - the email is logged for auditing
+            // This allows the application to continue functioning without an SMTP server configured
         }
     }
 
