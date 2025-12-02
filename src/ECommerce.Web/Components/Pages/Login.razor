@@ -1,0 +1,101 @@
+@page "/login"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Login</h4>
+                </div>
+                <div class="card-body p-4">
+                    <EditForm Model="loginRequest" OnValidSubmit="HandleLoginAsync">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="loginRequest.Email" class="form-control" placeholder="demo@example.com" />
+                            <ValidationMessage For="() => loginRequest.Email" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText @bind-Value="loginRequest.Password" type="password" class="form-control" placeholder="Demo123!" />
+                            <ValidationMessage For="() => loginRequest.Password" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-circle me-2"></i>@errorMessage
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            Login
+                        </button>
+                    </EditForm>
+
+                    <hr class="my-4">
+
+                    <p class="text-center mb-2">
+                        Don't have an account? <a href="/register">Register</a>
+                    </p>
+
+                    <div class="alert alert-info mt-3 small">
+                        <strong>Demo Credentials:</strong><br>
+                        Email: demo@example.com<br>
+                        Password: Demo123!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginRequest = new();
+    private bool isLoading = false;
+    private string errorMessage = "";
+
+    private async Task HandleLoginAsync()
+    {
+        isLoading = true;
+        errorMessage = "";
+
+        var request = new LoginRequest
+        {
+            Email = loginRequest.Email,
+            Password = loginRequest.Password
+        };
+
+        var (success, error) = await AuthService.LoginAsync(request);
+
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = error ?? "Login failed";
+        }
+
+        isLoading = false;
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

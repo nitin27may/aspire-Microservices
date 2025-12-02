@@ -1,0 +1,13 @@
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/bin/Debug/net9.0/ECommerce.ServiceDefaults.deps.json
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/bin/Debug/net9.0/ECommerce.ServiceDefaults.dll
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/bin/Debug/net9.0/ECommerce.ServiceDefaults.pdb
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.csproj.AssemblyReference.cache
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.GeneratedMSBuildEditorConfig.editorconfig
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.AssemblyInfoInputs.cache
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.AssemblyInfo.cs
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.csproj.CoreCompileInputs.cache
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.sourcelink.json
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.dll
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/refint/ECommerce.ServiceDefaults.dll
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ECommerce.ServiceDefaults.pdb
+/home/runner/work/aspire-Microservices/aspire-Microservices/src/ECommerce.ServiceDefaults/obj/Debug/net9.0/ref/ECommerce.ServiceDefaults.dll
