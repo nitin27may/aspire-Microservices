@@ -1,0 +1,150 @@
+@page "/register"
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>Create Account</h4>
+                </div>
+                <div class="card-body p-4">
+                    <EditForm Model="registerRequest" OnValidSubmit="HandleRegisterAsync">
+                        <DataAnnotationsValidator />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <InputText @bind-Value="registerRequest.FirstName" class="form-control" placeholder="John" />
+                                <ValidationMessage For="() => registerRequest.FirstName" class="text-danger" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <InputText @bind-Value="registerRequest.LastName" class="form-control" placeholder="Doe" />
+                                <ValidationMessage For="() => registerRequest.LastName" class="text-danger" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Email</label>
+                                <InputText @bind-Value="registerRequest.Email" class="form-control" placeholder="john@example.com" />
+                                <ValidationMessage For="() => registerRequest.Email" class="text-danger" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Password</label>
+                                <InputText @bind-Value="registerRequest.Password" type="password" class="form-control" />
+                                <ValidationMessage For="() => registerRequest.Password" class="text-danger" />
+                                <small class="text-muted">Min 6 chars, uppercase, number, special char</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Confirm Password</label>
+                                <InputText @bind-Value="confirmPassword" type="password" class="form-control" />
+                            </div>
+
+                            <div class="col-12">
+                                <hr>
+                                <h6>Shipping Address</h6>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Street Address</label>
+                                <InputText @bind-Value="registerRequest.ShippingAddress" class="form-control" placeholder="123 Main St" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">City</label>
+                                <InputText @bind-Value="registerRequest.City" class="form-control" placeholder="Toronto" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Postal Code</label>
+                                <InputText @bind-Value="registerRequest.PostalCode" class="form-control" placeholder="M5H 2N2" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Country</label>
+                                <InputText @bind-Value="registerRequest.Country" class="form-control" placeholder="Canada" />
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>@errorMessage
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-primary w-100 mt-4" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            }
+                            Create Account
+                        </button>
+                    </EditForm>
+
+                    <hr class="my-4">
+
+                    <p class="text-center mb-0">
+                        Already have an account? <a href="/login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerRequest = new();
+    private string confirmPassword = "";
+    private bool isLoading = false;
+    private string errorMessage = "";
+
+    private async Task HandleRegisterAsync()
+    {
+        if (registerRequest.Password != confirmPassword)
+        {
+            errorMessage = "Passwords do not match.";
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = "";
+
+        var request = new RegisterRequest
+        {
+            Email = registerRequest.Email,
+            Password = registerRequest.Password,
+            FirstName = registerRequest.FirstName,
+            LastName = registerRequest.LastName,
+            ShippingAddress = registerRequest.ShippingAddress,
+            City = registerRequest.City,
+            PostalCode = registerRequest.PostalCode,
+            Country = registerRequest.Country
+        };
+
+        var (success, error) = await AuthService.RegisterAsync(request);
+
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = error ?? "Registration failed";
+        }
+
+        isLoading = false;
+    }
+
+    public class RegisterModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string ShippingAddress { get; set; } = "";
+        public string City { get; set; } = "";
+        public string PostalCode { get; set; } = "";
+        public string Country { get; set; } = "";
+    }
+}

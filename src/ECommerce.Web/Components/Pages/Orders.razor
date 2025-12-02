@@ -1,0 +1,244 @@
+@page "/orders"
+@page "/orders/{OrderNumber}"
+@inject OrderService OrderService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container py-4">
+    @if (!isAuthenticated)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>Please <a href="/login">log in</a> to view your orders.
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(OrderNumber))
+    {
+        <!-- Single Order View -->
+        @if (selectedOrder == null)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/orders">My Orders</a></li>
+                    <li class="breadcrumb-item active">@selectedOrder.OrderNumber</li>
+                </ol>
+            </nav>
+
+            @if (isNewOrder)
+            {
+                <div class="alert alert-success mb-4">
+                    <h4 class="alert-heading"><i class="bi bi-check-circle me-2"></i>Order Placed Successfully!</h4>
+                    <p class="mb-0">Thank you for your order. You will receive an email confirmation shortly.</p>
+                </div>
+            }
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <strong>Order #@selectedOrder.OrderNumber</strong>
+                    <span class="badge @GetStatusBadgeClass(selectedOrder.Status)">@selectedOrder.Status</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Order Date</h6>
+                            <p>@selectedOrder.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Estimated Delivery</h6>
+                            <p>@selectedOrder.CreatedAt.AddDays(7).ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+
+                    <h6>Shipping Address</h6>
+                    <p>@selectedOrder.ShippingAddress<br>@selectedOrder.City, @selectedOrder.PostalCode<br>@selectedOrder.Country</p>
+
+                    <h6 class="mt-4">Items</h6>
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th class="text-center">Quantity</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in selectedOrder.Items)
+                            {
+                                <tr>
+                                    <td>@item.ProductName</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">$@item.UnitPrice.ToString("F2")</td>
+                                    <td class="text-end">$@item.Subtotal.ToString("F2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total</strong></td>
+                                <td class="text-end"><strong class="text-primary">$@selectedOrder.TotalAmount.ToString("F2")</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="/products" class="btn btn-primary">
+                    <i class="bi bi-grid me-2"></i>Continue Shopping
+                </a>
+                <a href="/orders" class="btn btn-outline-secondary">
+                    <i class="bi bi-list me-2"></i>View All Orders
+                </a>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Orders List -->
+        <h1 class="mb-4"><i class="bi bi-box me-2"></i>My Orders</h1>
+
+        @if (orders == null)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (!orders.Items.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-box display-1 text-muted mb-4"></i>
+                <h3 class="text-muted">No orders yet</h3>
+                <p class="text-muted">Start shopping to place your first order!</p>
+                <a href="/products" class="btn btn-primary mt-3">
+                    <i class="bi bi-grid me-2"></i>Browse Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order Number</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Total</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in orders.Items)
+                                {
+                                    <tr>
+                                        <td><a href="/orders/@order.OrderNumber">@order.OrderNumber</a></td>
+                                        <td>@order.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        <td><span class="badge @GetStatusBadgeClass(order.Status)">@order.Status</span></td>
+                                        <td class="text-end">$@order.TotalAmount.ToString("F2")</td>
+                                        <td class="text-end">
+                                            <a href="/orders/@order.OrderNumber" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @if (orders.TotalPages > 1)
+            {
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage - 1)">Previous</button>
+                        </li>
+                        @for (int i = 1; i <= orders.TotalPages; i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item @(currentPage == pageNumber ? "active" : "")">
+                                <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == orders.TotalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => ChangePage(currentPage + 1)">Next</button>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    }
+</div>
+
+@code {
+    [Parameter] public string? OrderNumber { get; set; }
+    [SupplyParameterFromQuery] public bool isNewOrder { get; set; }
+
+    private bool isAuthenticated = false;
+    private PaginatedOrdersResponse? orders;
+    private OrderDto? selectedOrder;
+    private int currentPage = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        }
+        catch
+        {
+            // Ignore errors
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (isAuthenticated)
+        {
+            if (!string.IsNullOrEmpty(OrderNumber))
+            {
+                selectedOrder = await OrderService.GetOrderAsync(OrderNumber);
+            }
+            else
+            {
+                await LoadOrdersAsync();
+            }
+        }
+    }
+
+    private async Task LoadOrdersAsync()
+    {
+        orders = await OrderService.GetOrdersAsync(currentPage, 10);
+    }
+
+    private async Task ChangePage(int page)
+    {
+        currentPage = page;
+        await LoadOrdersAsync();
+    }
+
+    private string GetStatusBadgeClass(string status) => status switch
+    {
+        "Pending" => "bg-warning text-dark",
+        "Confirmed" => "bg-info",
+        "Shipped" => "bg-primary",
+        "Delivered" => "bg-success",
+        "Cancelled" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
