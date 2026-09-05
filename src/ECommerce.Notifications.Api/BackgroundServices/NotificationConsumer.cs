@@ -26,34 +26,31 @@ public class NotificationConsumer : BackgroundService
         _logger = logger;
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("NotificationConsumer starting...");
 
-        var channel = _rabbitConnection.CreateModel();
-        
-        // Declare exchange
-        channel.ExchangeDeclare(
+        var channel = await _rabbitConnection.CreateChannelAsync();
+
+        await channel.ExchangeDeclareAsync(
             exchange: "orders.exchange",
             type: ExchangeType.Topic,
             durable: true,
             autoDelete: false);
 
-        // Declare queue
-        channel.QueueDeclare(
+        await channel.QueueDeclareAsync(
             queue: "orders.notifications",
             durable: true,
             exclusive: false,
             autoDelete: false);
 
-        // Bind queue to exchange
-        channel.QueueBind(
+        await channel.QueueBindAsync(
             queue: "orders.notifications",
             exchange: "orders.exchange",
             routingKey: "order.created");
 
-        var consumer = new EventingBasicConsumer(channel);
-        consumer.Received += (sender, args) =>
+        var consumer = new AsyncEventingBasicConsumer(channel);
+        consumer.ReceivedAsync += async (sender, args) =>
         {
             try
             {
@@ -67,31 +64,37 @@ public class NotificationConsumer : BackgroundService
                     using var scope = _serviceProvider.CreateScope();
                     var emailService = scope.ServiceProvider.GetRequiredService<EmailService>();
 
-                    emailService.SendOrderConfirmationAsync(orderEvent).GetAwaiter().GetResult();
+                    await emailService.SendOrderConfirmationAsync(orderEvent);
                 }
 
-                channel.BasicAck(args.DeliveryTag, multiple: false);
+                await channel.BasicAckAsync(args.DeliveryTag, multiple: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing notification event");
-                channel.BasicNack(args.DeliveryTag, multiple: false, requeue: true);
+                await channel.BasicNackAsync(args.DeliveryTag, multiple: false, requeue: true);
             }
         };
 
-        channel.BasicConsume(
+        await channel.BasicConsumeAsync(
             queue: "orders.notifications",
             autoAck: false,
             consumer: consumer);
 
         _logger.LogInformation("NotificationConsumer started, waiting for messages...");
 
-        stoppingToken.Register(() =>
+        try
         {
-            channel.Close();
-            channel.Dispose();
-        });
-
-        return Task.CompletedTask;
+            await Task.Delay(Timeout.Infinite, stoppingToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected on shutdown
+        }
+        finally
+        {
+            await channel.CloseAsync();
+            await channel.DisposeAsync();
+        }
     }
 }

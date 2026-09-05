@@ -62,7 +62,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    
+
     // Redirect root to Scalar API docs
     app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
@@ -89,13 +89,12 @@ api.MapPost("/orders", async (CreateOrderRequest request, OrderService service, 
     }
 
     var (success, error, order) = await service.CreateOrderAsync(userId, request);
-    return success 
-        ? Results.Created($"/api/orders/{order!.OrderNumber}", order) 
+    return success
+        ? Results.Created($"/api/orders/{order!.OrderNumber}", order)
         : Results.Conflict(new { error });
 })
 .RequireAuthorization()
-.WithName("CreateOrder")
-.WithOpenApi();
+.WithName("CreateOrder");
 
 api.MapGet("/orders", async (int page, int pageSize, OrderService service, HttpContext context) =>
 {
@@ -109,8 +108,7 @@ api.MapGet("/orders", async (int page, int pageSize, OrderService service, HttpC
     return Results.Ok(orders);
 })
 .RequireAuthorization()
-.WithName("GetOrders")
-.WithOpenApi();
+.WithName("GetOrders");
 
 api.MapGet("/orders/{orderNumber}", async (string orderNumber, OrderService service, HttpContext context) =>
 {
@@ -135,7 +133,6 @@ api.MapGet("/orders/{orderNumber}", async (string orderNumber, OrderService serv
     return Results.Ok(order);
 })
 .RequireAuthorization()
-.WithName("GetOrder")
-.WithOpenApi();
+.WithName("GetOrder");
 
 app.Run();

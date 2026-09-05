@@ -86,7 +86,7 @@ public class EmailService
         message.Body = bodyBuilder.ToMessageBody();
 
         using var client = new SmtpClient();
-        
+
         try
         {
             await client.ConnectAsync(smtpHost, smtpPort, false);

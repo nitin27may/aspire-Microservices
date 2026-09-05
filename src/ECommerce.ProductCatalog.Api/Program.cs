@@ -24,7 +24,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    
+
     // Redirect root to Scalar API docs
     app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
@@ -34,7 +34,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     await context.Database.EnsureCreatedAsync();
-    
+
     // Seed categories if empty
     if (!context.Categories.Any())
     {
@@ -49,7 +49,7 @@ using (var scope = app.Services.CreateScope())
         context.Categories.AddRange(categories);
         await context.SaveChangesAsync();
     }
-    
+
     // Seed products if empty
     if (!context.Products.Any())
     {
@@ -92,34 +92,29 @@ var api = app.MapGroup("/api");
 // Categories
 api.MapGet("/categories", async (ProductCatalogService service) =>
     Results.Ok(await service.GetCategoriesAsync()))
-    .WithName("GetCategories")
-    .WithOpenApi();
+    .WithName("GetCategories");
 
 api.MapGet("/categories/{id:int}", async (int id, ProductCatalogService service) =>
 {
     var category = await service.GetCategoryByIdAsync(id);
     return category is null ? Results.NotFound() : Results.Ok(category);
 })
-.WithName("GetCategory")
-.WithOpenApi();
+.WithName("GetCategory");
 
 // Products
 api.MapGet("/products", async ([AsParameters] ProductsRequest request, ProductCatalogService service) =>
     Results.Ok(await service.GetProductsAsync(request)))
-    .WithName("GetProducts")
-    .WithOpenApi();
+    .WithName("GetProducts");
 
 api.MapGet("/products/featured", async (ProductCatalogService service) =>
     Results.Ok(await service.GetFeaturedProductsAsync()))
-    .WithName("GetFeaturedProducts")
-    .WithOpenApi();
+    .WithName("GetFeaturedProducts");
 
 api.MapGet("/products/{id:int}", async (int id, ProductCatalogService service) =>
 {
     var product = await service.GetProductByIdAsync(id);
     return product is null ? Results.NotFound() : Results.Ok(product);
 })
-.WithName("GetProduct")
-.WithOpenApi();
+.WithName("GetProduct");
 
 app.Run();

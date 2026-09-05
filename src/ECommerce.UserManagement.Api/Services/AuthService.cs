@@ -143,8 +143,8 @@ public class AuthService
         user.Country = request.Country;
 
         var result = await _userManager.UpdateAsync(user);
-        return result.Succeeded 
-            ? (true, null) 
+        return result.Succeeded
+            ? (true, null)
             : (false, string.Join(", ", result.Errors.Select(e => e.Description)));
     }
 

@@ -165,13 +165,13 @@ public class OrderService
         return order == null ? null : MapToDto(order);
     }
 
-    private Task PublishOrderCreatedEventAsync(Order order, string userEmail)
+    private async Task PublishOrderCreatedEventAsync(Order order, string userEmail)
     {
         try
         {
-            using var channel = _rabbitConnection.CreateModel();
+            await using var channel = await _rabbitConnection.CreateChannelAsync();
 
-            channel.ExchangeDeclare(
+            await channel.ExchangeDeclareAsync(
                 exchange: "orders.exchange",
                 type: ExchangeType.Topic,
                 durable: true,
@@ -196,10 +196,9 @@ public class OrderService
 
             var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(orderEvent));
 
-            channel.BasicPublish(
+            await channel.BasicPublishAsync(
                 exchange: "orders.exchange",
                 routingKey: "order.created",
-                basicProperties: null,
                 body: body);
 
             _logger.LogInformation("Published OrderCreatedEvent for order: {OrderNumber}", order.OrderNumber);
@@ -208,7 +207,6 @@ public class OrderService
         {
             _logger.LogError(ex, "Failed to publish order event for: {OrderNumber}", order.OrderNumber);
         }
-        return Task.CompletedTask;
     }
 
     private static string GenerateOrderNumber()

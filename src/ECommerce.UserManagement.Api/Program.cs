@@ -64,7 +64,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    
+
     // Redirect root to Scalar API docs
     app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
@@ -74,7 +74,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
     await context.Database.EnsureCreatedAsync();
-    
+
     var seeder = scope.ServiceProvider.GetRequiredService<UserSeeder>();
     await seeder.SeedAsync();
 }
@@ -88,48 +88,43 @@ var api = app.MapGroup("/api");
 api.MapPost("/auth/register", async (RegisterRequest request, AuthService service) =>
 {
     var (success, error, response) = await service.RegisterAsync(request);
-    return success 
-        ? Results.Ok(response) 
+    return success
+        ? Results.Ok(response)
         : Results.BadRequest(new { error });
 })
-.WithName("Register")
-.WithOpenApi();
+.WithName("Register");
 
 api.MapPost("/auth/login", async (LoginRequest request, AuthService service) =>
 {
     var (success, error, response) = await service.LoginAsync(request);
-    return success 
-        ? Results.Ok(response) 
+    return success
+        ? Results.Ok(response)
         : Results.BadRequest(new { error });
 })
-.WithName("Login")
-.WithOpenApi();
+.WithName("Login");
 
 api.MapGet("/users/{userId}", async (string userId, AuthService service) =>
 {
     var profile = await service.GetProfileAsync(userId);
     return profile is null ? Results.NotFound() : Results.Ok(profile);
 })
-.WithName("GetUserProfile")
-.WithOpenApi();
+.WithName("GetUserProfile");
 
 api.MapGet("/users/email/{email}", async (string email, AuthService service) =>
 {
     var profile = await service.GetProfileByEmailAsync(email);
     return profile is null ? Results.NotFound() : Results.Ok(profile);
 })
-.WithName("GetUserByEmail")
-.WithOpenApi();
+.WithName("GetUserByEmail");
 
 api.MapPut("/users/{userId}", async (string userId, UpdateProfileRequest request, AuthService service) =>
 {
     var (success, error) = await service.UpdateProfileAsync(userId, request);
-    return success 
-        ? Results.Ok(new { message = "Profile updated successfully" }) 
+    return success
+        ? Results.Ok(new { message = "Profile updated successfully" })
         : Results.BadRequest(new { error });
 })
 .RequireAuthorization()
-.WithName("UpdateProfile")
-.WithOpenApi();
+.WithName("UpdateProfile");
 
 app.Run();

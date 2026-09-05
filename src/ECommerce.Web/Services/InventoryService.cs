@@ -35,7 +35,7 @@ public class InventoryService
         {
             var request = new StockCheckRequest { Items = items };
             var response = await _httpClient.PostAsJsonAsync("/api/inventory/check", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<StockCheckResponse>();

@@ -16,7 +16,7 @@ public class Order
     public string Country { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    
+
     public ICollection<OrderItem> Items { get; set; } = [];
 }
 
@@ -31,7 +31,7 @@ public class OrderItem
     public string ProductName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
-    
+
     public Order? Order { get; set; }
 }
 

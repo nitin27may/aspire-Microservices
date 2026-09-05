@@ -9,16 +9,16 @@ public record CreateOrderRequest
 {
     [Required]
     public List<CreateOrderItemRequest> Items { get; init; } = [];
-    
+
     [Required]
     public string ShippingAddress { get; init; } = string.Empty;
-    
+
     [Required]
     public string City { get; init; } = string.Empty;
-    
+
     [Required]
     public string PostalCode { get; init; } = string.Empty;
-    
+
     [Required]
     public string Country { get; init; } = string.Empty;
 }

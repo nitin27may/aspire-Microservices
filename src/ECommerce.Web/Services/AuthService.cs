@@ -28,7 +28,7 @@ public class AuthService
         try
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
@@ -40,7 +40,7 @@ public class AuthService
                     return (true, null);
                 }
             }
-            
+
             var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
             return (false, error?.Error ?? "Login failed");
         }
@@ -55,7 +55,7 @@ public class AuthService
         try
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/register", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
@@ -67,7 +67,7 @@ public class AuthService
                     return (true, null);
                 }
             }
-            
+
             var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
             return (false, error?.Error ?? "Registration failed");
         }

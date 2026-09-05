@@ -98,7 +98,7 @@ public class InventoryService
     public async Task<ReservationResponse> ReserveInventoryAsync(ReserveInventoryRequest request)
     {
         var strategy = _dbContext.Database.CreateExecutionStrategy();
-        
+
         return await strategy.ExecuteAsync(async () =>
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -170,7 +170,7 @@ public class InventoryService
     public async Task<bool> DeductInventoryAsync(int orderId, List<ReserveItem> items)
     {
         var strategy = _dbContext.Database.CreateExecutionStrategy();
-        
+
         return await strategy.ExecuteAsync(async () =>
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync();

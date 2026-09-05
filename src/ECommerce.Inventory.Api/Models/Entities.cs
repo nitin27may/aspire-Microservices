@@ -9,7 +9,7 @@ public class InventoryItem
     public int Stock { get; set; }
     public int ReservedStock { get; set; }
     public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
-    
+
     public int AvailableStock => Stock - ReservedStock;
 }
 

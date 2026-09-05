@@ -27,7 +27,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    
+
     // Redirect root to Scalar API docs
     app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
@@ -37,7 +37,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     await context.Database.EnsureCreatedAsync();
-    
+
     // Seed inventory data if empty
     if (!context.Inventory.Any())
     {
@@ -50,7 +50,7 @@ using (var scope = app.Services.CreateScope())
                 LastUpdated = DateTime.UtcNow
             })
             .ToList();
-        
+
         context.Inventory.AddRange(inventoryItems);
         await context.SaveChangesAsync();
     }
@@ -64,22 +64,19 @@ api.MapGet("/inventory/{productId:int}", async (int productId, InventoryService 
     var inventory = await service.GetInventoryAsync(productId);
     return inventory is null ? Results.NotFound() : Results.Ok(inventory);
 })
-.WithName("GetInventory")
-.WithOpenApi();
+.WithName("GetInventory");
 
 api.MapPost("/inventory/check", async (StockCheckRequest request, InventoryService service) =>
     Results.Ok(await service.CheckStockAsync(request)))
-    .WithName("CheckStock")
-    .WithOpenApi();
+    .WithName("CheckStock");
 
 api.MapPost("/inventory/reserve", async (ReserveInventoryRequest request, InventoryService service) =>
 {
     var result = await service.ReserveInventoryAsync(request);
-    return result.Success 
-        ? Results.Ok(result) 
+    return result.Success
+        ? Results.Ok(result)
         : Results.Conflict(result);
 })
-.WithName("ReserveInventory")
-.WithOpenApi();
+.WithName("ReserveInventory");
 
 app.Run();

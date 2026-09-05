@@ -9,7 +9,7 @@ public class Category
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int DisplayOrder { get; set; }
-    
+
     public ICollection<Product> Products { get; set; } = [];
 }
 
@@ -26,6 +26,6 @@ public class Product
     public string ImageUrl { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+
     public Category? Category { get; set; }
 }

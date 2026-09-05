@@ -26,7 +26,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
-    
+
     // Redirect root to Scalar API docs
     app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 }
@@ -73,8 +73,7 @@ api.MapGet("/emails", async (int page, int pageSize, NotificationsDbContext db) 
         PageSize = actualPageSize
     });
 })
-.WithName("GetEmailLogs")
-.WithOpenApi();
+.WithName("GetEmailLogs");
 
 api.MapGet("/emails/{id:int}", async (int id, NotificationsDbContext db) =>
 {
@@ -96,7 +95,6 @@ api.MapGet("/emails/{id:int}", async (int id, NotificationsDbContext db) =>
         CreatedAt = email.CreatedAt
     });
 })
-.WithName("GetEmailLog")
-.WithOpenApi();
+.WithName("GetEmailLog");
 
 app.Run();

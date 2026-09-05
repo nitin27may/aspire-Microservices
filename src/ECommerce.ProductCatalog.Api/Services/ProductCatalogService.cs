@@ -18,7 +18,7 @@ public class ProductCatalogService
     private const int ProductCacheTtlMinutes = 30;
 
     public ProductCatalogService(
-        CatalogDbContext dbContext, 
+        CatalogDbContext dbContext,
         IConnectionMultiplexer redis,
         ILogger<ProductCatalogService> logger)
     {
@@ -69,10 +69,10 @@ public class ProductCatalogService
     public async Task<PaginatedResponse<ProductDto>> GetProductsAsync(ProductsRequest request)
     {
         var cacheKey = $"products:page:{request.Page}:size:{request.PageSize}:cat:{request.CategoryId ?? 0}:search:{request.Search ?? ""}:sort:{request.SortBy ?? ""}";
-        
+
         var db = _redis.GetDatabase();
         var cached = await db.StringGetAsync(cacheKey);
-        
+
         if (!cached.IsNullOrEmpty)
         {
             _logger.LogInformation("Cache hit for key: {CacheKey}", cacheKey);
@@ -94,8 +94,8 @@ public class ProductCatalogService
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = request.Search.ToLower();
-            query = query.Where(p => 
-                p.Name.ToLower().Contains(search) || 
+            query = query.Where(p =>
+                p.Name.ToLower().Contains(search) ||
                 p.Description.ToLower().Contains(search));
         }
 
@@ -147,7 +147,7 @@ public class ProductCatalogService
         var cacheKey = $"product:{id}";
         var db = _redis.GetDatabase();
         var cached = await db.StringGetAsync(cacheKey);
-        
+
         if (!cached.IsNullOrEmpty)
         {
             _logger.LogInformation("Cache hit for product: {ProductId}", id);
@@ -189,7 +189,7 @@ public class ProductCatalogService
         var cacheKey = "products:featured";
         var db = _redis.GetDatabase();
         var cached = await db.StringGetAsync(cacheKey);
-        
+
         if (!cached.IsNullOrEmpty)
         {
             return JsonSerializer.Deserialize<List<ProductDto>>(cached.ToString())!;
