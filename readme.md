@@ -11,6 +11,53 @@ A production-quality, end-to-end e-commerce demonstration showcasing microservic
 
 See the [Roadmap](ROADMAP.md) for what's planned next, and [Contributing](CONTRIBUTING.md) if you'd like to help.
 
+## Screenshots
+
+<table>
+<tr>
+<td width="50%">
+
+**Storefront**
+<img src="docs/screenshots/home.jpg" alt="Storefront home page with categories and featured products" width="100%">
+
+</td>
+<td width="50%">
+
+**Product Catalog**
+<img src="docs/screenshots/products.jpg" alt="Product listing with filters and search" width="100%">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Cart**
+<img src="docs/screenshots/cart.jpg" alt="Shopping cart with items, subtotal, and tax" width="100%">
+
+</td>
+<td width="50%">
+
+**Checkout**
+<img src="docs/screenshots/checkout.jpg" alt="Checkout page with shipping address and order summary" width="100%">
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Order Confirmation**
+<img src="docs/screenshots/order-confirmation.jpg" alt="Order confirmation page showing order number and items" width="100%">
+
+</td>
+<td width="50%">
+
+**.NET Aspire Dashboard**
+<img src="docs/screenshots/aspire-dashboard.jpg" alt="Aspire Dashboard showing all 16 resources running" width="100%">
+
+</td>
+</tr>
+</table>
+
 ## Architecture Overview
 
 ### Microservices
