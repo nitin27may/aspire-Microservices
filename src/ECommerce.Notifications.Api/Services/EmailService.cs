@@ -2,6 +2,7 @@ using System.Text;
 using ECommerce.Notifications.Api.Data;
 using ECommerce.Notifications.Api.Models;
 using ECommerce.Shared.Contracts.Events;
+using MailKit;
 using MailKit.Net.Smtp;
 using MimeKit;
 
@@ -96,7 +97,7 @@ public class EmailService
                 await client.AuthenticateAsync(smtpUser, smtpPass);
             }
 
-            await client.SendAsync(message);
+            await client.SendAsync(new SendRequest(message));
             await client.DisconnectAsync(true);
         }
         catch (Exception ex)
