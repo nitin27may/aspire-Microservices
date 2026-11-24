@@ -4,7 +4,7 @@ This project is a reference implementation for .NET Aspire microservices pattern
 
 ## Now
 
-- [x] Upgrade to .NET 10 and .NET Aspire 13.x
+- [x] Upgrade to .NET 11 and .NET Aspire 17
 - [x] Move RabbitMQ consumers/producers to the fully-async RabbitMQ.Client 7.x API
 - [x] CI workflow (build + format check) on every PR
 - [ ] Integration tests for each API using `Aspire.Hosting.Testing` + WebApplicationFactory
