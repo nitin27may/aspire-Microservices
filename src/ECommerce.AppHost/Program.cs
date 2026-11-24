@@ -19,17 +19,17 @@ var rabbitMq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin();
 
 // APIs
-var productCatalogApi = builder.AddProject<Projects.ECommerce_ProductCatalog_Api>("productcatalogapi")
+var productCatalogApi = builder.AddDotnetProject("productcatalogapi", "../ECommerce.ProductCatalog.Api/ECommerce.ProductCatalog.Api.csproj")
     .WithReference(catalogDb)
     .WithReference(redis)
     .WaitFor(catalogDb)
     .WaitFor(redis);
 
-var userManagementApi = builder.AddProject<Projects.ECommerce_UserManagement_Api>("usermanagementapi")
+var userManagementApi = builder.AddDotnetProject("usermanagementapi", "../ECommerce.UserManagement.Api/ECommerce.UserManagement.Api.csproj")
     .WithReference(usersDb)
     .WaitFor(usersDb);
 
-var inventoryApi = builder.AddProject<Projects.ECommerce_Inventory_Api>("inventoryapi")
+var inventoryApi = builder.AddDotnetProject("inventoryapi", "../ECommerce.Inventory.Api/ECommerce.Inventory.Api.csproj")
     .WithReference(inventoryDb)
     .WithReference(redis)
     .WithReference(rabbitMq)
@@ -37,7 +37,7 @@ var inventoryApi = builder.AddProject<Projects.ECommerce_Inventory_Api>("invento
     .WaitFor(redis)
     .WaitFor(rabbitMq);
 
-var ordersApi = builder.AddProject<Projects.ECommerce_Orders_Api>("ordersapi")
+var ordersApi = builder.AddDotnetProject("ordersapi", "../ECommerce.Orders.Api/ECommerce.Orders.Api.csproj")
     .WithReference(ordersDb)
     .WithReference(rabbitMq)
     .WithReference(inventoryApi)
@@ -46,7 +46,7 @@ var ordersApi = builder.AddProject<Projects.ECommerce_Orders_Api>("ordersapi")
     .WaitFor(ordersDb)
     .WaitFor(rabbitMq);
 
-var notificationsApi = builder.AddProject<Projects.ECommerce_Notifications_Api>("notificationsapi")
+var notificationsApi = builder.AddDotnetProject("notificationsapi", "../ECommerce.Notifications.Api/ECommerce.Notifications.Api.csproj")
     .WithReference(notificationsDb)
     .WithReference(rabbitMq)
     .WithReference(userManagementApi)
@@ -54,7 +54,7 @@ var notificationsApi = builder.AddProject<Projects.ECommerce_Notifications_Api>(
     .WaitFor(rabbitMq);
 
 // Web UI
-builder.AddProject<Projects.ECommerce_Web>("webfrontend")
+builder.AddDotnetProject("webfrontend", "../ECommerce.Web/ECommerce.Web.csproj")
     .WithExternalHttpEndpoints()
     .WithReference(productCatalogApi)
     .WithReference(userManagementApi)

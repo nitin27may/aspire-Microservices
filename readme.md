@@ -1,8 +1,8 @@
 # E-Commerce Microservices Demo with .NET Aspire
 
 [![CI](https://github.com/nitin27may/aspire-Microservices/actions/workflows/ci.yml/badge.svg)](https://github.com/nitin27may/aspire-Microservices/actions/workflows/ci.yml)
-[![.NET 10](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
-[![.NET Aspire 13](https://img.shields.io/badge/.NET%20Aspire-13-512BD4)](https://aspire.dev)
+[![.NET 11](https://img.shields.io/badge/.NET-11-512BD4)](https://dotnet.microsoft.com/download/dotnet/11.0)
+[![.NET Aspire 17](https://img.shields.io/badge/.NET%20Aspire-17-512BD4)](https://aspire.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## About
@@ -82,7 +82,7 @@ For detailed architecture and data flow visualizations, see:
 ## Getting Started
 
 ### Prerequisites
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+- [.NET 11 SDK](https://dotnet.microsoft.com/download/dotnet/11.0)
 - [Aspire CLI](https://aspire.dev/get-started/install-cli/) — `curl -sSL https://aspire.dev/install.sh | bash` (macOS/Linux) or see the link for Windows/Homebrew/npm options
 - Docker Desktop (for running PostgreSQL, Redis, and RabbitMQ)
 
@@ -99,7 +99,7 @@ cd aspire-Microservices
 cd src/ECommerce.AppHost
 aspire run
 ```
-   `dotnet run` also works as a fallback if you don't want to install the Aspire CLI, but `aspire run` is the officially recommended workflow as of Aspire 13.
+   `dotnet run` also works as a fallback if you don't want to install the Aspire CLI, but `aspire run` is the officially recommended workflow as of Aspire 17.
 
 3. Open the Aspire Dashboard URL shown in the console (a login link with a token, typically `https://localhost:17138/login?t=...`)
 
@@ -127,8 +127,8 @@ aspire run
 
 ## Technology Stack
 
-- **.NET 10** - Application framework
-- **.NET Aspire 13** - Cloud-native orchestration
+- **.NET 11** - Application framework
+- **.NET Aspire 17** - Cloud-native orchestration
 - **Blazor Server** - Interactive web UI
 - **Entity Framework Core 10** - Data access
 - **ASP.NET Core Identity** - Authentication
@@ -140,7 +140,7 @@ aspire run
 
 ### Keeping dependencies current
 
-This repo pins package versions in [`src/Directory.Packages.props`](src/Directory.Packages.props) and the SDK in [`global.json`](global.json) (using `rollForward: latestFeature` so any installed .NET 10 feature band works). .NET Aspire moved from a `9.x` versioning scheme to `13.x` alongside the .NET 10 release — if you're upgrading an older clone, expect breaking changes in the RabbitMQ client (`IModel` → `IChannel`, all methods now `*Async`) and in EF Core/Identity version pins (no longer forced to 9.x). Run `dotnet outdated` or check NuGet directly before assuming a version bump is a patch-level change.
+This repo pins package versions in [`src/Directory.Packages.props`](src/Directory.Packages.props) and the SDK in [`global.json`](global.json) (using `rollForward: latestFeature` so any installed .NET 11 feature band works). .NET Aspire moved from a `9.x` versioning scheme to `13.x` alongside the .NET 10 release — if you're upgrading an older clone, expect breaking changes in the RabbitMQ client (`IModel` → `IChannel`, all methods now `*Async`) and in EF Core/Identity version pins (no longer forced to 9.x). Run `dotnet outdated` or check NuGet directly before assuming a version bump is a patch-level change.
 
 ## Project Structure
 
@@ -223,7 +223,7 @@ The application comes pre-seeded with:
 
 - **Browser automation / testing tools clicking `@onclick` buttons**: some CDP-based automation tools fail to trigger Blazor Server's synthetic click delegation on plain `@onclick` buttons (forms with `EditForm`/`OnValidSubmit` and `<a>` navigation are unaffected). If you're writing E2E tests, prefer Playwright/Selenium's native click, which dispatches trusted input events correctly.
 - **First `aspire run`** downloads the DCP orchestrator binary and does a one-time NuGet version check — the first run can take noticeably longer than subsequent ones.
-- **Multiple .NET SDKs installed**: if `dotnet --list-sdks` shows more than one location, make sure `DOTNET_ROOT`/`PATH` resolve to the one with .NET 10, since the Aspire CLI's process resolution doesn't always match your shell's `dotnet`.
+- **Multiple .NET SDKs installed**: if `dotnet --list-sdks` shows more than one location, make sure `DOTNET_ROOT`/`PATH` resolve to the one with .NET 11, since the Aspire CLI's process resolution doesn't always match your shell's `dotnet`.
 
 ## Contributing
 
